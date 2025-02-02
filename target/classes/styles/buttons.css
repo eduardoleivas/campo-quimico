@@ -1,0 +1,31 @@
+
+/* Proxima Nova ScOsf Bold */
+@font-face {
+    -fx-font-family: "Proxima Nova ScOsf Rg";
+    src: url("../fonts/ProximaNovaBold.ttf");
+}
+
+/* Proxima Nova Semibold */
+@font-face {
+    -fx-font-family: "Proxima Nova Lt";
+    src: url("../fonts/ProximaNovaSemibold.ttf");
+}
+
+/* Proxima Nova Regular */
+@font-face {
+    -fx-font-family: "Proxima Nova Rg";
+    src: url("../fonts/ProximaNovaRegular.ttf");
+}
+
+/* Button Styles */
+.menu_btn {
+    -fx-font-family: "Proxima Nova Lt";  /* Ensure this matches the font face */
+    -fx-font-size: 18px;
+    -fx-font-style: italic;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, black, 15, 0.3, 0, 0);
+}
+
+.menu_btn:hover {
+    -fx-background-color: grey;
+}
