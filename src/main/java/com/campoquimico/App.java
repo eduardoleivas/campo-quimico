@@ -15,8 +15,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-import com.campoquimico.positionHandlers.PositionHandler;
-import com.campoquimico.buttonHandlers.MainMenuButtonHandler;
+import com.campoquimico.handlers.positionHandlers.PositionHandler;
+import com.campoquimico.handlers.buttonHandlers.MainMenuButtonHandler;
 
 public class App extends Application {
 

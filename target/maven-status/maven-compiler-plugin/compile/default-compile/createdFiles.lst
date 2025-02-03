@@ -1,5 +1,7 @@
 com\campoquimico\App.class
 com\campoquimico\EnvVariables.class
-com\campoquimico\positionHandlers\PositionHandler.class
+com\campoquimico\database\DatabaseReader.class
+com\campoquimico\handlers\buttonHandlers\MainMenuButtonHandler.class
+com\campoquimico\objects\tile.class
 module-info.class
-com\campoquimico\buttonHandlers\MainMenuButtonHandler.class
+com\campoquimico\handlers\positionHandlers\PositionHandler.class

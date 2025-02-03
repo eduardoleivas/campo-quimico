@@ -9,7 +9,7 @@ public class EnvVariables {
     public static final int MENU_WIDTH = 600;
     public static final int MENU_HEIGHT = 400;
 
-    private EnvVariables() {
-        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
-    }
+    //GAME VARIABLES
+    public static final int TILE_SIZE = 40;
+    public static final int BOARD_SIZE = 15;
 }
