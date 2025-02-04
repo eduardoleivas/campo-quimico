@@ -18,6 +18,45 @@ public class DatabaseReader {
         this.filePath = filePath;
     }
 
+    public int getRandomMolecule() {
+        int moleculeId = 0;
+        try (FileInputStream fis = new FileInputStream(filePath);
+             XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+
+            int sheetCount = workbook.getNumberOfSheets();
+            if (sheetCount == 0) {
+                System.out.println("The file must have at least one sheet.");
+                return moleculeId;
+            }
+            moleculeId = random.nextInt(sheetCount);
+
+        } catch (Exception e) {
+            System.out.println("Error reading the file: " + e.getMessage());
+        }
+
+        return moleculeId;
+    }
+
+    public String getMoleculeName(int moleculeId) {
+        String moleculeName = null;
+        try (FileInputStream fis = new FileInputStream(filePath);
+             XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+
+            int sheetCount = workbook.getNumberOfSheets();
+            if (sheetCount == 0) {
+                System.out.println("The file must have at least one sheet.");
+                return null;
+            }
+
+            XSSFSheet sheet = workbook.getSheetAt(moleculeId);//SHEET SELECTOR
+            moleculeName = sheet.getSheetName();
+        } catch (Exception e) {
+            System.out.println("Error reading the file.");
+        }
+
+        return moleculeName;
+    }
+
     public String[][] processMolecule(int moleculeId) {
         try (FileInputStream fis = new FileInputStream(filePath);
              XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
@@ -28,7 +67,7 @@ public class DatabaseReader {
                 return null;
             }
 
-            XSSFSheet sheet = workbook.getSheetAt(moleculeId); // SHEET SELECTOR
+            XSSFSheet sheet = workbook.getSheetAt(moleculeId);//SHEET SELECTOR
             String moleculeName = sheet.getSheetName();
             System.out.println("Molecule Name: " + moleculeName);
 

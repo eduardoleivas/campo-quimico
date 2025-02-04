@@ -28,20 +28,21 @@ public class MainMenuButtonHandler {
     public void handleStartButton(ActionEvent event) {
         try {
             dbReader = new DatabaseReader(new File(getClass().getResource("/database/default.xlsx").toURI()).getAbsolutePath());
-            String[][] molecule = dbReader.processMolecule(2);
-            GameScreen gameScreen = new GameScreen(molecule);
+            int moleculeId = dbReader.getRandomMolecule();
+            String[][] molecule = dbReader.processMolecule(moleculeId);
+            GameScreen gameScreen = new GameScreen(molecule, dbReader.getMoleculeName(moleculeId));
             Stage boardStage = new Stage();
-            boardStage.setTitle("Board");
+            boardStage.setTitle("JOGO");
             boardStage.setScene(gameScreen.getGameScreen());
             boardStage.show();
 
-            primaryStage.hide(); //HIDE THE MAIN MENU INSTEAD OF CLOSING
+            if(primaryStage.isShowing())
+                primaryStage.hide(); //HIDE THE MAIN MENU INSTEAD OF CLOSING
 
             //RETURNS TO MENU WHEN THE GAME IS CLOSED
             boardStage.setOnCloseRequest(e -> primaryStage.show());
 
         } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

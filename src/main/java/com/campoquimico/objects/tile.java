@@ -1,12 +1,17 @@
 package com.campoquimico.objects;
 
 import javafx.event.EventHandler;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+
+import java.util.Optional;
 
 import com.campoquimico.EnvVariables;
 
@@ -20,6 +25,7 @@ public class Tile extends StackPane {
     private String tip4;
     private String tip5;
     private String tip6;
+    private String molecule;
     private Rectangle overlay;
     private boolean isEmpty;
     private boolean isRevealed = false;
@@ -78,6 +84,9 @@ public class Tile extends StackPane {
     public void setTip6(String tip6) {
         this.tip6 = tip6;
     }
+    public void setMolecule(String molecule) {
+        this.molecule = molecule;
+    }
     public boolean isEmpty() {
         return this.isEmpty;
     }
@@ -88,7 +97,7 @@ public class Tile extends StackPane {
     //CONSTRUCTOR
     public Tile(String atomId, String symbol, String name, 
                 String tip1, String tip2, String tip3, 
-                String tip4, String tip5, String tip6) {
+                String tip4, String tip5, String tip6, String molecule) {
         this.atomId = atomId;
         this.symbol = symbol;
         this.name = name;
@@ -121,18 +130,49 @@ public class Tile extends StackPane {
         overlay.setStrokeWidth(1);
 
         //HIDE RECTANGLE ON-CLICK
-        this.setOnMouseClicked(event -> revealTile());
+        this.setOnMouseClicked(event -> revealTile(molecule));
 
         // Stack everything properly
         getChildren().addAll(background, text, overlay);
     }
 
-    public void revealTile() {
-        System.out.println("Revealed: " + this.isRevealed + " | " + "Empty: " + this.isEmpty);
+    public void revealTile(String molecule) {
+        //System.out.println("Revealed: " + this.isRevealed + " | " + "Empty: " + this.isEmpty);
 
         if (!this.isRevealed) {
             this.isRevealed = true;
             getChildren().remove(overlay);
+            return;
         }
+
+        System.out.println(molecule);
+
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Adivinhe");
+        dialog.setHeaderText("Qual é o nome desta molécula?");
+        dialog.setContentText("Insira sua Resposta:");
+
+        // Show dialog and wait for user input
+        Optional<String> result = dialog.showAndWait();
+
+        // Check if input was provided
+        if (result.isPresent()) {
+            String answer = result.get().trim(); // Get and trim input
+
+            // Check correctness
+            if (answer.equalsIgnoreCase(molecule)) {
+                showAlert(AlertType.INFORMATION, "Certo!", "Sua resposta está certa! A molécula é: " + molecule);
+            } else {
+                showAlert(AlertType.WARNING, "Errado!", "Sua resposta está errada! Tente novamente.");
+            }
+        }
+    }
+
+    private void showAlert(AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
