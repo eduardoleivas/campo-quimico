@@ -1,7 +1,17 @@
 package com.campoquimico.objects;
 
-public class tile {
-    private int id;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+
+import com.campoquimico.EnvVariables;
+
+public class Tile extends StackPane {
+    private String atomId;
     private String symbol;
     private String name;
     private String tip1;
@@ -10,12 +20,15 @@ public class tile {
     private String tip4;
     private String tip5;
     private String tip6;
+    private Rectangle overlay;
+    private boolean isEmpty;
+    private boolean isRevealed = false;
 
-    public int getId() {
-        return id;
+    public String getAtomId() {
+        return atomId;
     }
-    public void setId(int id) {
-        this.id = id;
+    public void setSAtomId(String atomId) {
+        this.atomId = atomId;
     }
     public String getSymbol() {
         return symbol;
@@ -65,10 +78,18 @@ public class tile {
     public void setTip6(String tip6) {
         this.tip6 = tip6;
     }
+    public boolean isEmpty() {
+        return this.isEmpty;
+    }
+    public boolean isRevealed() {
+        return this.isRevealed;
+    }
 
     //CONSTRUCTOR
-    public tile(int id, String symbol, String name, String tip1, String tip2, String tip3, String tip4, String tip5, String tip6) {
-        this.id = id;
+    public Tile(String atomId, String symbol, String name, 
+                String tip1, String tip2, String tip3, 
+                String tip4, String tip5, String tip6) {
+        this.atomId = atomId;
         this.symbol = symbol;
         this.name = name;
         this.tip1 = tip1;
@@ -77,5 +98,41 @@ public class tile {
         this.tip4 = tip4;
         this.tip5 = tip5;
         this.tip6 = tip6;
+        this.isEmpty = atomId.equals("X");;
+
+        // White background
+        Rectangle background = new Rectangle(EnvVariables.TILE_SIZE, EnvVariables.TILE_SIZE);
+        background.setFill(Color.WHITE);
+        background.setStroke(Color.BLACK);
+        background.setStrokeWidth(1);
+
+        //ADD SYMBOL TO THE TILE, OR SET IT AS EMPTY
+        Text text = new Text();
+        if (!isEmpty) {
+            text.setText(symbol);
+            text.setFont(new Font(20));
+            text.setFill(Color.BLACK);
+        }
+
+        //OVERLAY RECTANGLE
+        overlay = new Rectangle(EnvVariables.TILE_SIZE, EnvVariables.TILE_SIZE);
+        overlay.setFill(Color.BLUE);
+        overlay.setStroke(Color.BLACK);
+        overlay.setStrokeWidth(1);
+
+        //HIDE RECTANGLE ON-CLICK
+        this.setOnMouseClicked(event -> revealTile());
+
+        // Stack everything properly
+        getChildren().addAll(background, text, overlay);
+    }
+
+    public void revealTile() {
+        System.out.println("Revealed: " + this.isRevealed + " | " + "Empty: " + this.isEmpty);
+
+        if (!this.isRevealed) {
+            this.isRevealed = true;
+            getChildren().remove(overlay);
+        }
     }
 }

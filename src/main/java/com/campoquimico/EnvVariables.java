@@ -10,6 +10,6 @@ public class EnvVariables {
     public static final int MENU_HEIGHT = 400;
 
     //GAME VARIABLES
-    public static final int TILE_SIZE = 40;
+    public static final int TILE_SIZE = 30;
     public static final int BOARD_SIZE = 15;
 }
