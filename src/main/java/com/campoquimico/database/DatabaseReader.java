@@ -18,6 +18,25 @@ public class DatabaseReader {
         this.filePath = filePath;
     }
 
+    public boolean checkMoleculeExists(int moleculeId) {
+        try (FileInputStream fis = new FileInputStream(filePath);
+             XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+
+            int sheetCount = workbook.getNumberOfSheets();
+            if (sheetCount == 0) {
+                System.out.println("The file must have at least one sheet.");
+                return false;
+            }
+
+            if(workbook.getSheetAt(moleculeId) != null) {
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public int getRandomMolecule() {
         int moleculeId = 0;
         try (FileInputStream fis = new FileInputStream(filePath);

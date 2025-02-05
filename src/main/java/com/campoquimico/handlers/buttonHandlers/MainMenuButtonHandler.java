@@ -17,13 +17,13 @@ import javafx.stage.Stage;
 
 import com.campoquimico.database.DatabaseReader;
 import com.campoquimico.game.GameScreen;
+import com.campoquimico.handlers.gameHandlers.GameHandler;
 import com.campoquimico.handlers.optionsHandlers.OptionsHandler;
 
 public class MainMenuButtonHandler {
 
     private final Stage primaryStage;
     private DatabaseReader dbReader;
-    private int sequentialModeId = 0;
 
     public MainMenuButtonHandler(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -36,12 +36,12 @@ public class MainMenuButtonHandler {
         if (OptionsHandler.getInstance().isRandomMode()) {
             moleculeId = dbReader.getRandomMolecule();
         } else {
-            moleculeId = sequentialModeId;
+            moleculeId = GameHandler.getInstance().getSequentialId();
         }
     
         String[][] molecule = dbReader.processMolecule(moleculeId);
         Stage boardStage = new Stage();
-        GameScreen gameScreen = new GameScreen(molecule, dbReader.getMoleculeName(moleculeId), boardStage, primaryStage, sequentialModeId);
+        GameScreen gameScreen = new GameScreen(molecule, dbReader.getMoleculeName(moleculeId), boardStage, primaryStage, moleculeId);
         boardStage.setTitle("JOGO");
         boardStage.setScene(gameScreen.getGameScreen());
         boardStage.show();
@@ -51,7 +51,7 @@ public class MainMenuButtonHandler {
         }
     
         // Close the main menu window when the game window is closed
-        boardStage.setOnCloseRequest(e -> primaryStage.show());
+        boardStage.setOnCloseRequest(closeEvent -> gameScreen.onCloseGame(closeEvent, primaryStage));
     }
 
     //SETTINGS BUTTON HANDLER

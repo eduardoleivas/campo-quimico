@@ -4,6 +4,8 @@ import java.util.Random;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -13,6 +15,7 @@ import com.campoquimico.handlers.gameHandlers.GameHandler;
 import com.campoquimico.handlers.optionsHandlers.OptionsHandler;
 import com.campoquimico.database.DatabaseReader;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class GameScreen {
     private Scene boardScene;
@@ -97,22 +100,37 @@ public class GameScreen {
             }
 
             //GET NEW MOLECULE ID
-            int newMoleculeId = OptionsHandler.getInstance().isRandomMode() ? 
-                new DatabaseReader(OptionsHandler.getInstance().getDatabase()).getRandomMolecule() 
-                : sequentialModeId + 1; //INCREMENT IF SEQUENTIAL MODE
+            int newMoleculeId;
+            if(OptionsHandler.getInstance().isRandomMode()) {
+                newMoleculeId = new DatabaseReader(OptionsHandler.getInstance().getDatabase()).getRandomMolecule();
+            } else {
+                GameHandler.getInstance().setSequentialId(GameHandler.getInstance().getSequentialId() + 1);
+                newMoleculeId = GameHandler.getInstance().getSequentialId();
+            }
 
             //OPEN NEW GAME WINDOW
-            Stage newBoardStage = new Stage();
-            newBoardStage.setTitle("JOGO");
-
             DatabaseReader newDbReader = new DatabaseReader(OptionsHandler.getInstance().getDatabase());
-            String[][] newMolecule = newDbReader.processMolecule(newMoleculeId);
-            GameScreen newGameScreen = new GameScreen(newMolecule, newDbReader.getMoleculeName(newMoleculeId), newBoardStage, primaryStage, newMoleculeId);
-
-            newBoardStage.setScene(newGameScreen.getGameScreen());
-            GameHandler.getInstance().setNextButton(false);
-            newBoardStage.setOnCloseRequest(e -> primaryStage.show());
-            newBoardStage.show();
+            if(!newDbReader.checkMoleculeExists(newMoleculeId)) {
+                showAlert(AlertType.INFORMATION, "Parabéns!", "Você completou todas as moléculas deste Banco de Dados.");
+                boardStage.close();
+                GameHandler.getInstance().setNextButton(false);
+                GameHandler.getInstance().setSequentialId(0);
+                if(!primaryStage.isShowing()) {
+                    primaryStage.show();
+                }
+                return;
+                
+            } else {
+                Stage newBoardStage = new Stage();
+                newBoardStage.setTitle("JOGO");
+                String[][] newMolecule = newDbReader.processMolecule(newMoleculeId);
+                GameScreen newGameScreen = new GameScreen(newMolecule, newDbReader.getMoleculeName(newMoleculeId), newBoardStage, primaryStage, newMoleculeId);
+    
+                newBoardStage.setScene(newGameScreen.getGameScreen());
+                GameHandler.getInstance().setNextButton(false);
+                newBoardStage.setOnCloseRequest(closeEvent -> onCloseGame(closeEvent, primaryStage));
+                newBoardStage.show();
+            }
         });
 
         // LAYOUT USING ANCHORPANE
@@ -158,5 +176,19 @@ public class GameScreen {
             revealEmptyTiles(x - 1, y);     // LEFT
         });
         delay.play();
+    }
+
+    public void onCloseGame(WindowEvent event, Stage primaryStage) {
+        GameHandler.getInstance().setSequentialId(0);
+        GameHandler.getInstance().setNextButton(false);
+        primaryStage.show();
+    }
+
+    private void showAlert(AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
