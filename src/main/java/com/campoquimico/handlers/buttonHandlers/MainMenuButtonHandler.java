@@ -33,23 +33,24 @@ public class MainMenuButtonHandler {
     public void handleStartButton(ActionEvent event) {
         dbReader = new DatabaseReader(OptionsHandler.getInstance().getDatabase());
         int moleculeId;
-        if(OptionsHandler.getInstance().isRandomMode()) {
+        if (OptionsHandler.getInstance().isRandomMode()) {
             moleculeId = dbReader.getRandomMolecule();
         } else {
             moleculeId = sequentialModeId;
         }
-        
+    
         String[][] molecule = dbReader.processMolecule(moleculeId);
-        GameScreen gameScreen = new GameScreen(molecule, dbReader.getMoleculeName(moleculeId));
         Stage boardStage = new Stage();
+        GameScreen gameScreen = new GameScreen(molecule, dbReader.getMoleculeName(moleculeId), boardStage, primaryStage, sequentialModeId);
         boardStage.setTitle("JOGO");
         boardStage.setScene(gameScreen.getGameScreen());
         boardStage.show();
-
-        if(primaryStage.isShowing())
-            primaryStage.hide(); //HIDE THE MAIN MENU INSTEAD OF CLOSING
-
-        //RETURNS TO MENU WHEN THE GAME IS CLOSED
+    
+        if (primaryStage.isShowing()) {
+            primaryStage.hide(); // Hide the main menu instead of closing
+        }
+    
+        // Close the main menu window when the game window is closed
         boardStage.setOnCloseRequest(e -> primaryStage.show());
     }
 
@@ -71,7 +72,8 @@ public class MainMenuButtonHandler {
             OptionsHandler.getInstance().setVolume(newVal.doubleValue()));
 
         // Random Mode Checkbox
-        CheckBox randomModeCheckBox = new CheckBox("Modo Aleatório: Desativado");
+        CheckBox randomModeCheckBox = new CheckBox("Modo Aleatório: Ativado");
+        randomModeCheckBox.setSelected(true);
         randomModeCheckBox.setOnAction(e -> {
             String status = randomModeCheckBox.isSelected() ? "Ativado" : "Desativado";
             randomModeCheckBox.setText("Modo Aleatório: " + status);
