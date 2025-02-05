@@ -17,10 +17,11 @@ import javafx.stage.Stage;
 
 import com.campoquimico.handlers.positionHandlers.PositionHandler;
 import com.campoquimico.handlers.buttonHandlers.MainMenuButtonHandler;
+import com.campoquimico.handlers.optionsHandlers.OptionsHandler;
 
 public class App extends Application {
 
-    public MediaPlayer bgmPlayer;
+    private MediaPlayer bgmPlayer;
 
     @Override
     public void start(Stage primaryStage) {
@@ -29,18 +30,23 @@ public class App extends Application {
         Scene mainMenuScene = new Scene(mainMenuRoot, EnvVariables.MENU_WIDTH, EnvVariables.MENU_HEIGHT); //DEFINES THE MENU SCENE
 
         //LOAD CUSTOM CURSOR
-        ImageCursor customCursor = new ImageCursor(new Image(getClass().getResource("/img/cursor.png").toExternalForm(), 256, 256, false, false), 128, 128);
-        mainMenuScene.setCursor(customCursor);
+        //ImageCursor customCursor = new ImageCursor(new Image(getClass().getResource("/img/cursor.png").toExternalForm(), 256, 256, false, false), 128, 128);
+        //mainMenuScene.setCursor(customCursor);
 
         //LOAD BGM
         Media bgm = new Media(getClass().getResource("/music/menu_bgm.wav").toExternalForm());
         bgmPlayer = new MediaPlayer(bgm);
         bgmPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-        bgmPlayer.setVolume(0.5);
+        bgmPlayer.setVolume(OptionsHandler.getInstance().getVolume());
         bgmPlayer.play();
         bgmPlayer.setOnEndOfMedia(() -> {
-            bgmPlayer.seek(bgmPlayer.getStartTime());  // Restart from the beginning
-            bgmPlayer.play();  // Play the music again
+            bgmPlayer.seek(bgmPlayer.getStartTime());
+            bgmPlayer.play();
+        });
+
+        OptionsHandler.getInstance().volumeProperty().addListener((obs, oldVal, newVal) -> {
+            bgmPlayer.setVolume(newVal.doubleValue());
+            System.out.println("BGM Player Volume Updated: " + newVal);
         });
 
         primaryStage.setTitle(EnvVariables.APP_NAME);
