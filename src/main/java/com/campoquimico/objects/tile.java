@@ -12,6 +12,7 @@ import javafx.scene.text.Text;
 import java.util.Optional;
 
 import com.campoquimico.EnvVariables;
+import com.campoquimico.handlers.gameHandlers.GameHandler;
 
 public class Tile extends StackPane {
     private String atomId;
@@ -160,6 +161,7 @@ public class Tile extends StackPane {
             // Check correctness
             if (answer.equalsIgnoreCase(molecule)) {
                 showAlert(AlertType.INFORMATION, "Certo!", "Sua resposta está certa! A molécula é: " + molecule);
+                GameHandler.getInstance().setNextButton(true);
             } else {
                 showAlert(AlertType.WARNING, "Errado!", "Sua resposta está errada! Tente novamente.");
             }

@@ -9,6 +9,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 import com.campoquimico.objects.Tile;
+import com.campoquimico.handlers.gameHandlers.GameHandler;
 import com.campoquimico.handlers.optionsHandlers.OptionsHandler;
 import com.campoquimico.database.DatabaseReader;
 import javafx.stage.Stage;
@@ -83,19 +84,24 @@ public class GameScreen {
             }
         }
 
-        // CREATE "NEXT" BUTTON
+        //CREATE "NEXT" BUTTON
         Button nextButton = new Button("Próximo");
+        nextButton.setVisible(false);
+        GameHandler.getInstance().showNextProperty().addListener((obs, oldVal, newVal) -> {
+            nextButton.setVisible(newVal.booleanValue());
+            System.out.println("ShowButton Updated: " + newVal);
+        });
         nextButton.setOnAction(event -> {
             if (boardStage != null && boardStage.isShowing()) {
-                boardStage.close(); // Close the current game window before opening a new one
+                boardStage.close(); //CLOSE CURRENT GAME BEFORE OPENING NEXT ONE
             }
 
-            // Get the new molecule ID
+            //GET NEW MOLECULE ID
             int newMoleculeId = OptionsHandler.getInstance().isRandomMode() ? 
                 new DatabaseReader(OptionsHandler.getInstance().getDatabase()).getRandomMolecule() 
-                : sequentialModeId + 1; // Increment if sequential mode
+                : sequentialModeId + 1; //INCREMENT IF SEQUENTIAL MODE
 
-            // Open new game window
+            //OPEN NEW GAME WINDOW
             Stage newBoardStage = new Stage();
             newBoardStage.setTitle("JOGO");
 
@@ -104,6 +110,7 @@ public class GameScreen {
             GameScreen newGameScreen = new GameScreen(newMolecule, newDbReader.getMoleculeName(newMoleculeId), newBoardStage, primaryStage, newMoleculeId);
 
             newBoardStage.setScene(newGameScreen.getGameScreen());
+            GameHandler.getInstance().setNextButton(false);
             newBoardStage.setOnCloseRequest(e -> primaryStage.show());
             newBoardStage.show();
         });
