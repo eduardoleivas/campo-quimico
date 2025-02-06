@@ -1,5 +1,6 @@
 package com.campoquimico.game;
 
+import java.util.List;
 import java.util.Random;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -51,7 +52,10 @@ public class GameScreen {
         this.boardStage = boardStage;
         int moleculeWidth = molecule[0].length;
         int moleculeHeight = molecule.length;
+        DatabaseReader dbReader = new DatabaseReader(OptionsHandler.getInstance().getDatabase());
 
+        List<List<String>> atomInfos = dbReader.getInfos(sequentialModeId);
+        
         // RANDOM INDEX GENERATORS
         int indexPosX = random.nextInt(BOARD_SIZE - moleculeWidth + 1);
         int indexPosY = random.nextInt(BOARD_SIZE - moleculeHeight + 1);
@@ -72,8 +76,32 @@ public class GameScreen {
                     }
                 }
 
-                // CREATE TILE AND ADD TO GRIDPANE
-                Tile tile = new Tile(tileId, tileId, "", "", "", "", "", "", "", actualMolecule);
+                // FIND TILE INFO FROM ATOM INFOS
+                List<String> tileInfo = null;
+                for (List<String> row : atomInfos) {
+                    if (!row.isEmpty() && row.get(0).equals(tileId)) {
+                        tileInfo = row;
+                        break;
+                    }
+                }
+
+                // CREATE TILE WITH INFO
+                Tile tile;
+                if (tileInfo != null) {
+                    String symbol = tileInfo.size() > 1 ? tileInfo.get(1) : tileId;
+                    String name = tileInfo.size() > 2 ? tileInfo.get(2) : "";
+                    String tip1 = tileInfo.size() > 3 ? tileInfo.get(3) : "";
+                    String tip2 = tileInfo.size() > 4 ? tileInfo.get(4) : "";
+                    String tip3 = tileInfo.size() > 5 ? tileInfo.get(5) : "";
+                    String tip4 = tileInfo.size() > 6 ? tileInfo.get(6) : "";
+                    String tip5 = tileInfo.size() > 7 ? tileInfo.get(7) : "";
+                    String tip6 = tileInfo.size() > 8 ? tileInfo.get(8) : "";
+
+                    tile = new Tile(tileId, symbol, name, tip1, tip2, tip3, tip4, tip5, tip6, actualMolecule);
+                } else {
+                    tile = new Tile(tileId, tileId, "", "", "", "", "", "", "", actualMolecule);
+                }
+                
                 boardTiles[i][j] = tile;
                 gridPane.add(tile, j, i);
 
@@ -142,7 +170,7 @@ public class GameScreen {
         AnchorPane.setLeftAnchor(gridPane, 0.0);
         AnchorPane.setRightAnchor(gridPane, 0.0);
 
-        AnchorPane.setBottomAnchor(nextButton, 10.0); // 10px from the bottom
+        AnchorPane.setBottomAnchor(nextButton, 10.0);
         AnchorPane.setLeftAnchor(nextButton, (BOARD_SIZE * TILE_SIZE) / 2.0 - 40); // Centered
 
         this.boardScene = new Scene(layout, BOARD_SIZE * TILE_SIZE, (BOARD_SIZE * TILE_SIZE) + 50);
@@ -155,7 +183,7 @@ public class GameScreen {
 
         if (tile.isRevealed() || !tile.isEmpty()) return;
 
-        tile.revealTile(actualMolecule);
+        tile.revealTile(null, actualMolecule);
 
         // FADE-IN EFFECT FOR THE TILES
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.3), tile);
@@ -163,17 +191,17 @@ public class GameScreen {
         fadeIn.setToValue(1);
         fadeIn.play();
 
-        // REVEAL ADJACENT EMPTY TILES RECURSIVELY
+        //REVEAL ADJACENT EMPTY TILES RECURSIVELY
         PauseTransition delay = new PauseTransition(Duration.seconds(0.05));
         delay.setOnFinished(event -> {
-            revealEmptyTiles(x - 1, y - 1); // TOP-LEFT
-            revealEmptyTiles(x, y - 1);     // TOP
-            revealEmptyTiles(x + 1, y - 1); // TOP-RIGHT
-            revealEmptyTiles(x + 1, y);     // RIGHT
-            revealEmptyTiles(x + 1, y + 1); // BOTTOM-RIGHT
-            revealEmptyTiles(x, y + 1);     // BOTTOM
-            revealEmptyTiles(x - 1, y + 1); // BOTTOM-LEFT
-            revealEmptyTiles(x - 1, y);     // LEFT
+            revealEmptyTiles(x - 1, y - 1); //TOP-LEFT
+            revealEmptyTiles(x, y - 1);     //TOP
+            revealEmptyTiles(x + 1, y - 1); //TOP-RIGHT
+            revealEmptyTiles(x + 1, y);     //RIGHT
+            revealEmptyTiles(x + 1, y + 1); //BOTTOM-RIGHT
+            revealEmptyTiles(x, y + 1);     //BOTTOM
+            revealEmptyTiles(x - 1, y + 1); //BOTTOM-LEFT
+            revealEmptyTiles(x - 1, y);     //LEFT
         });
         delay.play();
     }

@@ -1,7 +1,10 @@
 com\campoquimico\App.class
 com\campoquimico\EnvVariables.class
+com\campoquimico\handlers\optionsHandlers\OptionsHandler.class
 com\campoquimico\database\DatabaseReader.class
+com\campoquimico\objects\Tile.class
 com\campoquimico\handlers\buttonHandlers\MainMenuButtonHandler.class
-com\campoquimico\objects\tile.class
+com\campoquimico\game\GameScreen.class
 module-info.class
+com\campoquimico\handlers\gameHandlers\GameHandler.class
 com\campoquimico\handlers\positionHandlers\PositionHandler.class

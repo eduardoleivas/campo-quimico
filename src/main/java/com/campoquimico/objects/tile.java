@@ -1,14 +1,25 @@
 package com.campoquimico.objects;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import com.campoquimico.EnvVariables;
@@ -129,41 +140,65 @@ public class Tile extends StackPane {
         overlay.setStrokeWidth(1);
 
         //HIDE RECTANGLE ON-CLICK
-        this.setOnMouseClicked(event -> revealTile(molecule));
+        this.setOnMouseClicked(event -> revealTile(event, molecule));
 
         // Stack everything properly
         getChildren().addAll(background, text, overlay);
     }
 
-    public void revealTile(String molecule) {
-        //System.out.println("Revealed: " + this.isRevealed + " | " + "Empty: " + this.isEmpty);
-
+    public void revealTile(MouseEvent event, String molecule) {
         if (!this.isRevealed) {
             this.isRevealed = true;
             getChildren().remove(overlay);
             return;
         }
 
-        System.out.println(molecule);
+        if(event == null) {
+            return;
+        }
 
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Adivinhe");
-        dialog.setHeaderText("Qual é o nome desta molécula?");
-        dialog.setContentText("Insira sua Resposta:");
+        //RIGHT CLICK HANDLER
+        if (event.getButton() == MouseButton.SECONDARY && !this.isEmpty) {
+            Stage infoStage = new Stage();
+            infoStage.setTitle("Informações do Átomo");
+            VBox vbox = new VBox(10);
+            vbox.setPadding(new Insets(10));
+            vbox.setAlignment(Pos.CENTER);
 
-        // Show dialog and wait for user input
-        Optional<String> result = dialog.showAndWait();
+            Label symbolLabel = new Label(this.symbol);
+            symbolLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
 
-        // Check if input was provided
-        if (result.isPresent()) {
-            String answer = result.get().trim(); // Get and trim input
+            Label nameLabel = new Label(this.name);
+            nameLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
 
-            // Check correctness
-            if (answer.equalsIgnoreCase(molecule)) {
-                showAlert(AlertType.INFORMATION, "Certo!", "Sua resposta está certa! A molécula é: " + molecule);
-                GameHandler.getInstance().setNextButton(true);
-            } else {
-                showAlert(AlertType.WARNING, "Errado!", "Sua resposta está errada! Tente novamente.");
+            VBox tipsBox = new VBox(5);
+            for (String tip : Arrays.asList(this.tip1, this.tip2, this.tip3, this.tip4, this.tip5, this.tip6)) {
+                TextField tipField = new TextField(tip);
+                tipField.setEditable(false);
+                tipsBox.getChildren().add(tipField);
+            }
+
+            vbox.getChildren().addAll(symbolLabel, nameLabel, new Label("Dicas:"), tipsBox);
+            Scene scene = new Scene(vbox, 300, 350);
+            infoStage.setScene(scene);
+            infoStage.show();
+
+        //LEFT CLICK HANDLER
+        } else if (event.getButton() == MouseButton.PRIMARY && !this.isEmpty) {
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Adivinhe");
+            dialog.setHeaderText("Qual é o nome desta molécula?");
+            dialog.setContentText("Insira sua Resposta:");
+
+            Optional<String> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                String answer = result.get().trim();
+                if (answer.equalsIgnoreCase(molecule)) {
+                    showAlert(AlertType.INFORMATION, "Certo!", "Sua resposta está certa! A molécula é: " + molecule);
+                    GameHandler.getInstance().setNextButton(true);
+                } else {
+                    showAlert(AlertType.WARNING, "Errado!", "Sua resposta está errada! Tente novamente.");
+                }
             }
         }
     }

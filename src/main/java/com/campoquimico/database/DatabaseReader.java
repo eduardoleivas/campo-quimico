@@ -1,6 +1,8 @@
 package com.campoquimico.database;
 
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -112,7 +114,7 @@ public class DatabaseReader {
                         String value = (cell != null && !cell.toString().isEmpty()) ? cell.toString() : "X";
                         board[row - 1][col] = value;
 
-                        if (!value.equals("X")) { // If cell is not empty, update bounding box
+                        if (!value.equals("X")) { //UPDATES BOUNDING BOX OF THE CELL
                             if (col < leftmost) leftmost = col;
                             if (col > rightmost) rightmost = col;
                             if (row - 1 < topmost) topmost = row - 1;
@@ -122,16 +124,16 @@ public class DatabaseReader {
                 }
             }
 
-            // If no atoms were found, return an empty array
+            //EMPTY ERROR HANDLER
             if (leftmost > rightmost || topmost > bottommost) {
                 return new String[0][0];
             }
 
-            // Calculate trimmed board size
+            //CALCULATE MOLECULE DIMENSIONS
             int width = rightmost - leftmost + 1;
             int height = bottommost - topmost + 1;
 
-            // Create trimmed board
+            //CREATE MOLECULE-ONLY BOARD
             String[][] trimmedBoard = new String[height][width];
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
@@ -139,11 +141,97 @@ public class DatabaseReader {
                 }
             }
 
+            Random random = new Random();
+            int randomNumber = random.nextInt();
+            if (randomNumber % 2 == 0) {
+                return rotate90(trimmedBoard, height, width);
+            }
             return trimmedBoard;
 
         } catch (Exception e) {
             System.out.println("Error reading file: " + e.getMessage());
-            return new String[0][0]; // Return empty array in case of an error
+            return new String[0][0];
+        }
+    }
+
+    private String[][] rotate90(String[][] matrix, int rows, int cols) {
+        String[][] rotated = new String[cols][rows];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                rotated[j][rows - 1 - i] = matrix[i][j];
+                switch(rotated[j][rows - 1 - i]) {
+                    case "-":
+                        rotated[j][rows - 1 - i] = "|";
+                        break;
+                    case "=":
+                        rotated[j][rows - 1 - i] = "||";
+                        break;
+                    case "|":
+                        rotated[j][rows - 1 - i] = "-";
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return rotated;
+    }
+
+    public void printMatrix(String[][] matrix) {
+        for (String[] row : matrix) {
+            for (String cell : row) {
+                System.out.print(cell + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public List<List<String>> getInfos(int moleculeId) {
+        List<List<String>> atomInfos = new ArrayList<>();
+        try (FileInputStream fis = new FileInputStream(filePath);
+            XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+
+            XSSFSheet sheet = workbook.getSheetAt(moleculeId);
+            if (sheet == null) {
+                System.out.println("Invalid molecule ID.");
+                return atomInfos;
+            }
+
+            int startRow = 2; //Q3 = ROW INDEX 2
+            int startCol = 16; //COLUMN Q
+            int endCol = 22; //COLUMN W
+            
+            for (int rowIdx = startRow; rowIdx < sheet.getLastRowNum(); rowIdx++) {
+                XSSFRow row = sheet.getRow(rowIdx);
+                if (row == null || row.getCell(startCol) == null || row.getCell(startCol).toString().isEmpty()) {
+                    break; //STOP IF EMPTY ROW IS FOUND
+                }
+
+                List<String> rowData = new ArrayList<>();
+                for (int colIdx = startCol; colIdx <= endCol; colIdx++) {
+                    XSSFCell cell = row.getCell(colIdx);
+                    rowData.add(cell != null ? cell.toString() : "");
+                }
+                atomInfos.add(rowData);
+            }
+        } catch (Exception e) {
+            System.out.println("Error reading atom info: " + e.getMessage());
+        }
+        return atomInfos;
+    }
+
+    public void printInfos(List<List<String>> atomInfos) {
+        for (int i = 0; i < atomInfos.size(); i++) {
+            System.out.println("ROW: " + (i + 1));
+            List<String> row = atomInfos.get(i);
+            StringBuilder rowOutput = new StringBuilder();
+            for (int j = 0; j < row.size(); j++) {
+                rowOutput.append(j).append(" - ").append(row.get(j));
+                if (j < row.size() - 1) {
+                    rowOutput.append(" | ");
+                }
+            }
+            System.out.println(rowOutput);
         }
     }
 }
