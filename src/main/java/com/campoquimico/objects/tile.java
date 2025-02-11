@@ -187,13 +187,13 @@ public class Tile extends StackPane {
         } else if (event.getButton() == MouseButton.PRIMARY && !this.isEmpty) {
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Adivinhe");
-            dialog.setHeaderText("Qual é o nome desta molécula?");
+            dialog.setHeaderText("Qual é o nome desta molécula?"); //RECONHECER COMPOSTO SEM ESPAÇO
             dialog.setContentText("Insira sua Resposta:");
 
             Optional<String> result = dialog.showAndWait();
             if (result.isPresent()) {
                 String answer = result.get().trim();
-                if (answer.equalsIgnoreCase(molecule)) {
+                if (answer.equalsIgnoreCase(molecule)) { //RECONHECER COMPOSTO SEM ESPAÇO
                     showAlert(AlertType.INFORMATION, "Certo!", "Sua resposta está certa! A molécula é: " + molecule);
                     GameHandler.getInstance().setNextButton(true);
                 } else {

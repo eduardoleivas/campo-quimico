@@ -82,7 +82,7 @@ public class DatabaseReader {
         try (FileInputStream fis = new FileInputStream(filePath);
              XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
 
-            int sheetCount = workbook.getNumberOfSheets();
+            int sheetCount = workbook.getNumberOfSheets(); //AVISAR SE FOR BANCO DE DADOS INVALIDO E NAO CARREGAR
             if (sheetCount == 0) {
                 System.out.println("The file must have at least one sheet.");
                 return null;
