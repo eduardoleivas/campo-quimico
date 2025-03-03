@@ -6,6 +6,7 @@ module com.campoquimico {
     
     requires org.apache.poi.ooxml;
     requires javafx.base;
+    requires org.apache.poi.poi;
     
 
     opens com.campoquimico to javafx.fxml;

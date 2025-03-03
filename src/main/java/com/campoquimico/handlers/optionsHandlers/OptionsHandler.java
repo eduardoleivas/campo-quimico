@@ -1,8 +1,6 @@
 package com.campoquimico.handlers.optionsHandlers;
 
-import java.io.File;
-import java.net.URISyntaxException;
-
+import com.campoquimico.handlers.resourceHandlers.ResourceHandler;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
@@ -12,6 +10,7 @@ public class OptionsHandler {
     private DoubleProperty volume;
     private boolean randomMode;
     private String database;
+    ResourceHandler resourceHandler = new ResourceHandler();
 
     
     public DoubleProperty volumeProperty() {
@@ -41,7 +40,7 @@ public class OptionsHandler {
 
     public void resetDatabase() {
         try {
-            this.database = new File(getClass().getResource("/database/default.xlsx").toURI()).getAbsolutePath();
+            this.database = resourceHandler.getExcelFilePath("/database/default.xlsx");
         } catch (Exception e) {
             System.out.println("Error resetting database: " + e.getMessage());
         }
@@ -52,8 +51,8 @@ public class OptionsHandler {
         try {
             this.volume = new SimpleDoubleProperty(0.5);
             this.randomMode = true;
-            this.database = new File(getClass().getResource("/database/default.xlsx").toURI()).getAbsolutePath();
-        } catch (URISyntaxException e) {
+            this.database = resourceHandler.getExcelFilePath("/database/default.xlsx");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

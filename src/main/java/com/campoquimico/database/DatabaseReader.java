@@ -4,6 +4,11 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -39,6 +44,24 @@ public class DatabaseReader {
         }
     }
 
+    public boolean checkSingleMolecule() {
+        try (FileInputStream fis = new FileInputStream(filePath);
+             XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+
+            int sheetCount = workbook.getNumberOfSheets();
+            if (sheetCount == 0) {
+                System.out.println("The file must have at least one sheet.");
+                return false;
+            } else if (sheetCount == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public int getRandomMolecule() {
         int moleculeId = 0;
         try (FileInputStream fis = new FileInputStream(filePath);
@@ -58,31 +81,102 @@ public class DatabaseReader {
         return moleculeId;
     }
 
-    public String getMoleculeName(int moleculeId) {
-        String moleculeName = null;
+    public List<String> getMoleculeName(int moleculeId) {
+        List<String> moleculeNames = new ArrayList<>();
         try (FileInputStream fis = new FileInputStream(filePath);
              XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
-
+    
             int sheetCount = workbook.getNumberOfSheets();
             if (sheetCount == 0) {
                 System.out.println("The file must have at least one sheet.");
                 return null;
             }
-
-            XSSFSheet sheet = workbook.getSheetAt(moleculeId);//SHEET SELECTOR
-            moleculeName = sheet.getSheetName();
+    
+            XSSFSheet sheet = workbook.getSheetAt(moleculeId); // SHEET SELECTOR
+    
+            //READ A32 AND A33
+            Row row32 = sheet.getRow(31); //ROW 32
+            Row row33 = sheet.getRow(32); //ROW 33
+    
+            if (row32 != null) {
+                Cell cell32 = row32.getCell(0); //COL A
+                if (cell32 != null) {
+                    moleculeNames.add(cell32.getStringCellValue());
+                }
+            }
+    
+            if (row33 != null) {
+                Cell cell33 = row33.getCell(0); //COL A
+                if (cell33 != null) {
+                    moleculeNames.add(cell33.getStringCellValue());
+                }
+            }
+    
         } catch (Exception e) {
             System.out.println("Error reading the file.");
         }
-
-        return moleculeName;
+    
+        return moleculeNames;
     }
+
+    public int getMoleculeGamemode(int moleculeId) {
+        int moleculeGamemode = -1; // Default value in case of error
+        try (FileInputStream fis = new FileInputStream(filePath);
+             XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+    
+            XSSFSheet sheet = workbook.getSheetAt(moleculeId); // SHEET SELECTOR
+    
+            // Retrieve cell A36 (row 36, col 0)
+            Row row = sheet.getRow(35); // Row 36 (0-indexed)
+            if (row != null) {
+                Cell cell = row.getCell(0); // Column A
+                if (cell != null && cell.getCellType() == CellType.NUMERIC) {
+                    moleculeGamemode = (int) cell.getNumericCellValue();
+                }
+            }
+    
+            if (moleculeGamemode == -1) {
+                System.out.println("Essa molécula não possui gamemode definido.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error reading the molecule gamemode: " + e.getMessage());
+        }
+        return moleculeGamemode;
+    }
+
+    public String getMoleculeTip(int moleculeId) {
+        String moleculeTip = null;
+        try (FileInputStream fis = new FileInputStream(filePath);
+            XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
+
+            XSSFSheet sheet = workbook.getSheetAt(moleculeId); // SHEET SELECTOR
+            
+            //CHECK TIP REGIONS
+            for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+                CellRangeAddress region = sheet.getMergedRegion(i);
+                if (region.isInRange(28, 0)) { //ROW 29 COL A
+                    Row row = sheet.getRow(region.getFirstRow());
+                    Cell cell = row.getCell(region.getFirstColumn());
+                    moleculeTip = cell.getStringCellValue();
+                    break;
+                }
+            }
+
+            if (moleculeTip == null) {
+                System.out.println("Essa molécula não possúi dica.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error reading the molecule tip.");
+        }
+        return moleculeTip;
+    }
+
 
     public String[][] processMolecule(int moleculeId) {
         try (FileInputStream fis = new FileInputStream(filePath);
              XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
 
-            int sheetCount = workbook.getNumberOfSheets(); //AVISAR SE FOR BANCO DE DADOS INVALIDO E NAO CARREGAR
+            int sheetCount = workbook.getNumberOfSheets();
             if (sheetCount == 0) {
                 System.out.println("The file must have at least one sheet.");
                 return null;
@@ -163,11 +257,35 @@ public class DatabaseReader {
                     case "-":
                         rotated[j][rows - 1 - i] = "|";
                         break;
+                    case "_":
+                        rotated[j][rows - 1 - i] = "|";
+                        break;
+                    case "--":
+                        rotated[j][rows - 1 - i] = "‖";
+                        break;
+                    case "__":
+                        rotated[j][rows - 1 - i] = "‖";
+                        break;
                     case "=":
-                        rotated[j][rows - 1 - i] = "||";
+                        rotated[j][rows - 1 - i] = "‖";
+                        break;
+                    case "---":
+                        rotated[j][rows - 1 - i] = "⦀";
+                        break;
+                    case "___":
+                        rotated[j][rows - 1 - i] = "⦀";
+                        break;
+                    case "≡":
+                        rotated[j][rows - 1 - i] = "⦀";
                         break;
                     case "|":
                         rotated[j][rows - 1 - i] = "-";
+                        break;
+                    case "||":
+                        rotated[j][rows - 1 - i] = "=";
+                        break;
+                    case "|||":
+                        rotated[j][rows - 1 - i] = "≡";
                         break;
                     default:
                         break;
